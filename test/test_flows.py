@@ -12,6 +12,7 @@ from pages.login_page import LoginPage
 from pages.home_page import HomePage
 from pages.book_ticket_page import BookTicketPage
 from pages.register_page import RegisterPage
+from selenium.webdriver.common.by import By
 
 class RailwayTest(unittest.TestCase):
 
@@ -60,14 +61,23 @@ class RailwayTest(unittest.TestCase):
 
         print("Step 5: Book a ticket")
         try:
-
             self.book_page.book_ticket(
-                depart='Đà Nẵng', 
-                arrive='Huế',     
+                depart='Đà Nẵng',
+                arrive='Huế',
                 seat='Soft seat',
                 amount='1'
             )
-            print("Ticket booked successfully!")
+            
+            print("Step 6: Verify Booking Success")
+            
+            success_header = self.driver.find_element(By.CSS_SELECTOR, "h1")
+            actual_text = success_header.text
+            
+            print(f"Result Page Header: {actual_text}")
+            
+            self.assertIn("ticket booked successfully!", actual_text.lower(), "Booking Failed: Success message not found!")
+            
+            print(">>> TEST PASSED: Quy trình đặt vé hoàn tất chính xác!")
             
         except Exception as e:
             self.driver.save_screenshot('error_booking.png')
