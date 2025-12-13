@@ -24,3 +24,8 @@ class BasePage:
     def scroll_into_view(self, locator):
         element = self.driver.find_element(*locator)
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
+    def wait_for_element(self, locator, timeout=10):
+        """Chờ một element xuất hiện và trả về element đó"""
+        return WebDriverWait(self.driver, timeout).until(
+            EC.visibility_of_element_located(locator)
+        )

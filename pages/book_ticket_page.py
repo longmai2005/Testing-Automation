@@ -1,9 +1,9 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from base.base_page import BasePage
+import time
 
 class BookTicketPage(BasePage):
-
     DEPART_DATE_SELECT = (By.NAME, 'Date')
     DEPART_STATION_SELECT = (By.NAME, 'DepartStation')
     ARRIVE_STATION_SELECT = (By.NAME, 'ArriveStation')
@@ -15,7 +15,6 @@ class BookTicketPage(BasePage):
         
         element_date = self.driver.find_element(*self.DEPART_DATE_SELECT)
         select_date = Select(element_date)
-        
         if date:
             select_date.select_by_visible_text(date)
         else:
@@ -28,19 +27,17 @@ class BookTicketPage(BasePage):
             try:
                 select.select_by_visible_text(text)
             except Exception:
-                print(f"\n[DEBUG] Không tìm thấy ga/lựa chọn: '{text}'")
-                print(f"[DEBUG] Danh sách các lựa chọn thực tế đang có:")
-                for option in select.options:
-                    print(f" - '{option.text}'") 
-                print("-" * 30)
-                raise 
+                print(f"[DEBUG] Cannot find option: '{text}'")
+                raise
 
         select_option(self.DEPART_STATION_SELECT, depart)
-
-        import time; time.sleep(1) 
+        time.sleep(1)
         select_option(self.ARRIVE_STATION_SELECT, arrive)
         select_option(self.SEAT_TYPE_SELECT, seat)
         select_option(self.TICKET_AMOUNT_SELECT, amount)
         
-        self.scroll_into_view(self.BOOK_TICKET_BTN)
-        self.do_click(self.BOOK_TICKET_BTN)
+        print("Attempting to click Book Ticket button via JS...")
+        book_btn = self.driver.find_element(*self.BOOK_TICKET_BTN)
+        self.driver.execute_script("arguments[0].click();", book_btn)
+        
+        time.sleep(2)

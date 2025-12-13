@@ -8,7 +8,9 @@ class RegisterPage(BasePage):
     PID_TXT = (By.ID, 'pid')
     REGISTER_BTN = (By.CSS_SELECTOR, 'input[value=Register]')
     
-    ERROR_MSG = (By.CSS_SELECTOR, 'p.message.error') 
+    SUCCESS_MSG = (By.CSS_SELECTOR, "#content h1") 
+
+    ERROR_MSG = (By.CSS_SELECTOR, "p.message.error")
 
     def register(self, email, password, pid):
         self.do_send_keys(self.EMAIL_TXT, email)
@@ -17,3 +19,10 @@ class RegisterPage(BasePage):
         self.do_send_keys(self.PID_TXT, pid)
         self.scroll_into_view(self.REGISTER_BTN)
         self.do_click(self.REGISTER_BTN)
+
+    def verify_registration_success(self):
+        try:
+            element = self.wait.until(lambda d: d.find_element(*self.SUCCESS_MSG))
+            return True
+        except:
+            return False
