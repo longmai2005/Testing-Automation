@@ -16,28 +16,43 @@ class HomeTest(unittest.TestCase):
         self.login_page = LoginPage(self.driver)
 
     def test_TC_HOME_01_ui_display(self):
-        """Check UI elements"""
-        print("\n--- TC_HOME_01: UI Display ---")
+        """TC_HOME_01: Kiểm tra giao diện trang Home"""
+        print("\n--- TC_HOME_01 ---")
         self.assertIn("Safe Railway", self.driver.title)
 
-    def test_TC_HOME_02_nav_not_logged_in(self):
-        """Check navigation when NOT logged in"""
-        print("\n--- TC_HOME_02: Navigation (Guest) ---")
+        header = self.driver.find_element_by_css_selector("h1").text
+        self.assertIn("Welcome to Safe Railway", header)
+
+    def test_TC_HOME_02_nav_guest(self):
+        """TC_HOME_02: Điều hướng khi chưa đăng nhập"""
+        print("\n--- TC_HOME_02 ---")
         self.home_page.go_to_contact_page()
         self.assertIn("Contact", self.driver.title)
         
         self.home_page.go_to_timetable_page()
         self.assertIn("TrainTimeTable", self.driver.page_source)
+        
+        self.home_page.go_to_book_ticket_page()
+        self.assertIn("Login", self.driver.title)
 
-    def test_TC_HOME_03_nav_logged_in(self):
-        """Check navigation when LOGGED IN"""
-        print("\n--- TC_HOME_03: Navigation (User) ---")
-
+    def test_TC_HOME_03_nav_user(self):
+        """TC_HOME_03: Điều hướng khi đã đăng nhập"""
+        print("\n--- TC_HOME_03 ---")
         self.home_page.go_to_login_page()
         self.login_page.login("cijnuj@ramcloud.us", "123456789") 
         
         self.home_page.go_to_change_password_page()
         self.assertIn("Change Password", self.driver.page_source)
+        
+        self.home_page.go_to_book_ticket_page()
+        self.assertIn("Book ticket", self.driver.title)
+
+    def test_TC_HOME_04_external_link(self):
+        """TC_HOME_04: Kiểm tra liên kết ngoài"""
+        print("\n--- TC_HOME_04 ---")
+        self.home_page.go_to_contact_page()
+        email_link = self.driver.find_element_by_css_selector(".contact a").get_attribute("href")
+        self.assertIn("mailto:", email_link)
 
     def tearDown(self):
         self.driver.quit()

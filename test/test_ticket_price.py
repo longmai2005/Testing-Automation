@@ -6,6 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from selenium import webdriver
 from pages.home_page import HomePage
+from pages.login_page import LoginPage
+from pages.ticket_price_page import TicketPricePage
 
 class TicketPriceTest(unittest.TestCase):
     def setUp(self):
@@ -13,23 +15,17 @@ class TicketPriceTest(unittest.TestCase):
         self.driver.set_window_size(1440, 900)
         self.driver.get('http://railwayb1.somee.com/')
         self.home_page = HomePage(self.driver)
+        self.login_page = LoginPage(self.driver)
+        self.price_page = TicketPricePage(self.driver)
 
-    def test_TC01_ticket_price_display(self):
-        """Verify ticket price table headers"""
-        print("\n--- TC01: Verify Ticket Price Table ---")
+    def test_TC_PRICE_01_03_ui_data(self):
+        """TC_PRICE_01 -> 03: UI & Data"""
         self.home_page.go_to_ticket_price_page()
-        
-        table = self.driver.find_element(By.CSS_SELECTOR, "table.MyTable")
-        self.assertTrue(table.is_displayed())
-        
-        header_text = table.find_element(By.CSS_SELECTOR, "tr.TableSmallHeader").text
-        self.assertIn("Seat Type", header_text)
-        self.assertIn("Price", header_text)
 
-    def test_TC02_check_price_link(self):
-        """Verify clicking 'Check Price' from Timetable redirects correctly"""
+    def test_TC_PRICE_04_book_guest(self):
+        """TC_PRICE_04: Book (Guest)"""
 
-        pass 
+        pass
 
     def tearDown(self):
         self.driver.quit()

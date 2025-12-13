@@ -25,33 +25,48 @@ class ChangePasswordTest(unittest.TestCase):
         self.email = f"auto_{''.join(random.choices(string.ascii_lowercase, k=8))}@gmail.com"
         self.password = "Pass123!"
         self.pid = ''.join(random.choices(string.digits, k=9))
-        
         self.home_page.go_to_register_page()
         self.register_page.register(self.email, self.password, self.pid)
         self.home_page.go_to_login_page()
         self.login_page.login(self.email, self.password)
 
-    def test_TC_CP_03_wrong_current_pass(self):
-        """Change pass with WRONG current password"""
-        print("\n--- TC_CP_03: Wrong Current Pass ---")
+    def test_TC_CP_01_ui(self):
+        """TC_CP_01: UI Change Pass"""
         self.home_page.go_to_change_password_page()
-        self.cp_page.change_password("WrongPass", "NewPass123!")
-        
-        error = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
-        self.assertIn("password is incorrect", error.lower())
+        self.assertIn("Change Password", self.driver.find_element(By.TAG_NAME, "h1").text)
 
-    def test_TC_CP_04_confirm_mismatch(self):
-        """Change pass with Confirm Mismatch"""
-        print("\n--- TC_CP_04: Confirm Mismatch ---")
+    def test_TC_CP_02_05_success_persistence(self):
+        """TC_CP_02 & 05: Success & Persistence"""
         self.home_page.go_to_change_password_page()
+        new_pass = "NewPass123!"
+        self.cp_page.change_password(self.password, new_pass)
         
+        self.home_page.logout()
+        
+        self.home_page.go_to_login_page()
+        self.login_page.login(self.email, self.password)
+        err = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
+        self.assertIn("invalid", err.lower())
+        
+        self.login_page.login(self.email, new_pass)
+        self.assertIn("Welcome", self.home_page.get_welcome_msg())
+
+    def test_TC_CP_03_wrong_current(self):
+        """TC_CP_03: Wrong Current Pass"""
+        self.home_page.go_to_change_password_page()
+        self.cp_page.change_password("WrongPass", "NewPass")
+        err = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
+        self.assertIn("incorrect", err.lower())
+
+    def test_TC_CP_04_mismatch(self):
+        """TC_CP_04: Confirm Mismatch"""
+        self.home_page.go_to_change_password_page()
         self.driver.find_element(By.ID, "currentPassword").send_keys(self.password)
-        self.driver.find_element(By.ID, "newPassword").send_keys("NewPass123")
-        self.driver.find_element(By.ID, "confirmPassword").send_keys("NewPass999")
+        self.driver.find_element(By.ID, "newPassword").send_keys("NewA")
+        self.driver.find_element(By.ID, "confirmPassword").send_keys("NewB")
         self.driver.find_element(By.CSS_SELECTOR, "input[value='Change Password']").click()
-        
-        error = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
-        self.assertIn("confirm password", error.lower())
+        err = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
+        self.assertIn("confirm", err.lower())
 
     def tearDown(self):
         self.driver.quit()

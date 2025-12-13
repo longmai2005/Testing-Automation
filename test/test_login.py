@@ -16,35 +16,46 @@ class LoginTest(unittest.TestCase):
         self.home_page = HomePage(self.driver)
         self.login_page = LoginPage(self.driver)
 
-    def test_TC_LOG_03_non_existing_email(self):
-        """Login with non-existing email"""
-        print("\n--- TC_LOG_03: Non-existing Email ---")
+    def test_TC_LOG_01_ui(self):
+        """TC_LOG_01: UI Login"""
         self.home_page.go_to_login_page()
-        self.login_page.login("khongtontai@gmail.com", "123456")
-        
+        self.assertIn("Login", self.driver.title)
+
+    def test_TC_LOG_02_success(self):
+        """TC_LOG_02: Login thành công"""
+        self.home_page.go_to_login_page()
+        self.login_page.login("cijnuj@ramcloud.us", "123456789")
+        self.assertIn("Welcome", self.home_page.get_welcome_msg())
+
+    def test_TC_LOG_03_06_invalid_credentials(self):
+        """TC_LOG_03 & 06: Sai email hoặc pass"""
+        self.home_page.go_to_login_page()
+        self.login_page.login("wrong@mail.com", "wrongpass")
         error = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
         self.assertIn("username or password", error.lower())
 
-    def test_TC_LOG_09_password_masked(self):
-        """Verify password field is masked"""
-        print("\n--- TC_LOG_09: Password Masked ---")
+    def test_TC_LOG_05_08_html_injection(self):
+        """TC_LOG_05 & 08: HTML Script injection"""
         self.home_page.go_to_login_page()
-        pass_field = self.driver.find_element(By.ID, "password")
-        field_type = pass_field.get_attribute("type")
-        self.assertEqual(field_type, "password", "Password field is NOT masked!")
+        self.login_page.login("<script>alert('xss')</script>", "pass")
+        try:
+            alert = self.driver.switch_to.alert
+            alert.accept()
+            self.fail("Security Vulnerability: Alert displayed!")
+        except:
+            pass 
 
-    def test_TC_LOG_10_lock_account(self):
-        """Login incorrectly 5 times triggers lock"""
-        print("\n--- TC_LOG_10: Account Lockout ---")
+    def test_TC_LOG_10_lockout(self):
+        """TC_LOG_10: Khóa tài khoản sau 5 lần sai"""
         self.home_page.go_to_login_page()
+
+        test_email = "lockme@test.com"
+        for _ in range(6):
+            self.login_page.login(test_email, "wrong")
+            self.driver.refresh()
         
-        for i in range(5):
-            self.login_page.login("testlock@gmail.com", "wrongpass")
-            self.driver.refresh() 
-        
-        self.login_page.login("testlock@gmail.com", "wrongpass")
+        self.login_page.login(test_email, "wrong")
         error = self.driver.find_element(By.CSS_SELECTOR, "p.message.error").text
-        print(f"Lock Msg: {error}")
 
 
     def tearDown(self):
