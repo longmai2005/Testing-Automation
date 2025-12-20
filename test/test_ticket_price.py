@@ -7,7 +7,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from selenium import webdriver
 from pages.home_page import HomePage
 from pages.login_page import LoginPage
-from pages.ticket_price_page import TicketPricePage
 
 class TicketPriceTest(unittest.TestCase):
     def setUp(self):
@@ -15,17 +14,23 @@ class TicketPriceTest(unittest.TestCase):
         self.driver.set_window_size(1440, 900)
         self.driver.get('http://railwayb1.somee.com/')
         self.home_page = HomePage(self.driver)
-        self.login_page = LoginPage(self.driver)
-        self.price_page = TicketPricePage(self.driver)
 
-    def test_TC_PRICE_01_03_ui_data(self):
-        """TC_PRICE_01 -> 03: UI & Data"""
+    def test_TC_PRICE_01_ui(self):
+        """TC_PRICE_01: UI Ticket Price displays properly"""
+        print("\n--- TC_PRICE_01 ---")
         self.home_page.go_to_ticket_price_page()
+        header = self.driver.find_element(By.CSS_SELECTOR, "h1").text
+        self.assertIn("Ticket Price", header)
+        
+        rows = self.driver.find_elements(By.CSS_SELECTOR, "table.MyTable tr")
+        self.assertGreater(len(rows), 1, "Price table is empty")
 
-    def test_TC_PRICE_04_book_guest(self):
-        """TC_PRICE_04: Book (Guest)"""
-
-        pass
+    def test_TC_PRICE_02_check_price_logic(self):
+        """TC_PRICE_02: Check price for specific trip"""
+        self.home_page.go_to_ticket_price_page()
+        prices = self.driver.find_elements(By.XPATH, "//table[@class='MyTable']//td[count(//th[text()='Price']/preceding-sibling::th)+1]")
+        for price in prices:
+            self.assertNotEqual(price.text, "", "Price should not be empty")
 
     def tearDown(self):
         self.driver.quit()
