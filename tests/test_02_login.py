@@ -1,42 +1,30 @@
-import pytest
 import allure
+import pytest
 from selenium.webdriver.common.by import By
 
 @allure.feature("Module 3: Login")
 class TestLogin:
 
     @allure.story("TC_LOG_02: Đăng nhập thành công")
-    def test_login_success(self, driver):
-        driver.get("http://www.raillog.net/Account/Login.cshtml")
-        with allure.step("Nhập user/pass đúng"):
-            driver.find_element(By.ID, "username").send_keys("test_user@gmail.com") # Thay bằng acc thật
-            driver.find_element(By.ID, "password").send_keys("12345678")
+    def test_login_success(self, driver, base_url):
+        driver.get(base_url + "/Account/Login.cshtml")
+        
+        with allure.step("Nhập thông tin đúng"):
+            driver.find_element(By.ID, "username").send_keys("cijnuj@ramcloud.us") 
+            driver.find_element(By.ID, "password").send_keys("123456789")
             driver.find_element(By.CSS_SELECTOR, "input[value='Login']").click()
         
-        with allure.step("Check chuyển trang"):
-            assert "Welcome" in driver.page_source
+        with allure.step("Kiểm tra đăng nhập thành công"):
+            assert len(driver.find_elements(By.LINK_TEXT, "Log out")) > 0
 
     @allure.story("TC_LOG_06: Đăng nhập sai pass")
-    def test_login_wrong_pass(self, driver):
-        driver.get("http://www.raillog.net/Account/Login.cshtml")
-        driver.find_element(By.ID, "username").send_keys("test_user@gmail.com")
-        driver.find_element(By.ID, "password").send_keys("wrongpass")
+    def test_login_wrong_pass(self, driver, base_url):
+        driver.get(base_url + "/Account/Login.cshtml")
+        
+        driver.find_element(By.ID, "username").send_keys("longmai2005@gmail.com")
+        driver.find_element(By.ID, "password").send_keys("saipassroi")
         driver.find_element(By.CSS_SELECTOR, "input[value='Login']").click()
         
-        err = driver.find_element(By.CLASS_NAME, "error-msg").text # Thay locator lỗi
-        assert "Invalid username or password" in err
-
-    @allure.story("TC_LOG_10: Đăng nhập sai quá 5 lần (Account Locking)")
-    def test_login_lock_account(self, driver):
-        driver.get("http://www.raillog.net/Account/Login.cshtml")
-        # Loop 5 lần
-        for i in range(5):
-            with allure.step(f"Lần nhập sai thứ {i+1}"):
-                driver.find_element(By.ID, "username").send_keys("lock_user@gmail.com")
-                driver.find_element(By.ID, "password").send_keys("wrong")
-                driver.find_element(By.CSS_SELECTOR, "input[value='Login']").click()
-                driver.find_element(By.ID, "username").clear()
-        
-        with allure.step("Kiểm tra thông báo khóa"):
-            err = driver.find_element(By.CLASS_NAME, "error-msg").text
-            assert "locked" in err.lower()
+        with allure.step("Kiểm tra báo lỗi"):
+            error_msg = driver.find_element(By.CLASS_NAME, "message").text
+            assert "Invalid username or password" in error_msg

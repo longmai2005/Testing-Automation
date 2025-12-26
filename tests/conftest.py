@@ -4,14 +4,15 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-# URL của trang web (Thay bằng URL thực tế của bài tập)
-BASE_URL = "http://www.raillog.net/" 
+@pytest.fixture(scope="session")
+def base_url():
+
+    return "http://railwayb1.somee.com"
 
 @pytest.fixture(scope="function")
 def driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")
-    # options.add_argument("--headless") # Bỏ comment nếu muốn chạy ngầm
     
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
