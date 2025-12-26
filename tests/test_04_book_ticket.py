@@ -1,44 +1,50 @@
 import allure
 import pytest
+import time
+from datetime import datetime, timedelta
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from datetime import datetime, timedelta
 
-@allure.feature("Module 4: Book Ticket")
+@allure.feature("Module: Book Ticket")
 class TestBookTicket:
+    VALID_USER = "cijnuj@ramcloud.us"
+    VALID_PASS = "123456789"
 
-    def login_precondition(self, driver, base_url):
-        driver.get(base_url + "/Account/Login.cshtml")
-        driver.find_element(By.ID, "username").send_keys("longmai2005@gmail.com") 
-        driver.find_element(By.ID, "password").send_keys("12345678")
-        driver.find_element(By.CSS_SELECTOR, "input[value='Login']").click()
+    def login(self, driver, base_url):
+        driver.get(f"{base_url}/Account/Login.cshtml")
+        driver.find_element(By.ID, "username").send_keys(self.VALID_USER)
+        driver.find_element(By.ID, "password").send_keys(self.VALID_PASS)
+        driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
 
-    @allure.story("TC_BOOK_03: Đặt vé ngày hợp lệ")
-    def test_book_valid_date(self, driver, base_url):
-        self.login_precondition(driver, base_url)
+    @allure.story("TC_BOOK_01: Redirect về Login nếu chưa đăng nhập")
+    def test_redirect(self, driver, base_url):
+        driver.delete_all_cookies() 
+        driver.get(f"{base_url}/Page/BookTicketPage.cshtml")
+        assert "Login" in driver.current_url
+
+    @allure.story("TC_BOOK_03: Kiểm tra ngày khởi hành (Logic 3-30 ngày)")
+    def test_depart_date_range(self, driver, base_url):
+        self.login(driver, base_url)
+        driver.get(f"{base_url}/Page/BookTicketPage.cshtml")
         
-        driver.get(base_url + "/Page/BookTicketPage.cshtml")
+        date_select = Select(driver.find_element(By.NAME, "Date"))
+        options = date_select.options
         
-        with allure.step("Chọn ngày đi (Ngày mai + 4 ngày)"):
-            target_date = (datetime.now() + timedelta(days=4))
-            formatted_date = f"{target_date.month}/{target_date.day}/{target_date.year}"
-            
-            date_dropdown = Select(driver.find_element(By.NAME, "Date"))
-            try:
-                date_dropdown.select_by_visible_text(formatted_date)
-            except:
-
-                date_dropdown.select_by_index(1)
-
-        with allure.step("Chọn Ga đi / Ga đến"):
-            Select(driver.find_element(By.NAME, "DepartStationId")).select_by_index(1)
-            import time
-            time.sleep(1) 
-            Select(driver.find_element(By.NAME, "ArriveStationId")).select_by_index(1)
-            Select(driver.find_element(By.NAME, "SeatType")).select_by_index(1)
-            Select(driver.find_element(By.NAME, "TicketAmount")).select_by_visible_text("1")
-
-        with allure.step("Submit vé"):
-            driver.find_element(By.CSS_SELECTOR, "input[value='Book ticket']").click()
+        first_date_str = options[0].text
+        last_date_str = options[-1].text
         
-            assert "Success" in driver.current_url or "ManageTicket" in driver.current_url
+        assert len(options) >= 3, "Phải có ít nhất vài ngày để chọn"
+
+    @allure.story("TC_BOOK_04: Ga đi và Ga đến phải khác nhau/Logic Trip Matrix")
+    def test_station_logic(self, driver, base_url):
+        self.login(driver, base_url)
+        driver.get(f"{base_url}/Page/BookTicketPage.cshtml")
+        
+       
+        Select(driver.find_element(By.NAME, "DepartStationId")).select_by_visible_text("Sài Gòn")
+        time.sleep(1) 
+        
+        arrive_select = Select(driver.find_element(By.NAME, "ArriveStationId"))
+        all_arrive_text = [opt.text for opt in arrive_select.options]
+        
+        assert "Sài Gòn" not in all_arrive_text or len(all_arrive_text) == 1

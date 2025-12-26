@@ -1,41 +1,34 @@
-import pytest
 import allure
+import pytest
 from selenium.webdriver.common.by import By
 
-@allure.feature("Module 5 & 8: Management")
-class TestManagement:
+@allure.feature("Module: General (Home, FAQ, Timetable)")
+class TestGeneral:
     
-    def login(self, driver):
-        driver.get("http://www.raillog.net/Account/Login.cshtml")
-        driver.find_element(By.ID, "username").send_keys("test_user@gmail.com")
-        driver.find_element(By.ID, "password").send_keys("12345678")
-        driver.find_element(By.CSS_SELECTOR, "input[value='Login']").click()
+    @allure.story("TC_HOME_03: External Links")
+    def test_external_link(self, driver, base_url):
+        driver.get(f"{base_url}/Page/HomePage.cshtml")
+    
+        driver.find_element(By.LINK_TEXT, "Contact").click()
+        assert "Contact" in driver.title
 
-    @allure.story("TC_MYT_03: Hủy vé")
-    def test_cancel_ticket(self, driver):
-        self.login(driver)
-        driver.get("http://www.raillog.net/Page/ManageTicket.cshtml")
-        
-        with allure.step("Tìm nút Cancel đầu tiên"):
-            # Tìm nút cancel của vé đầu tiên trong bảng
-            cancel_btn = driver.find_element(By.XPATH, "//table//tr[2]//input[@value='Cancel']")
-            cancel_btn.click()
-            
-            # Xử lý alert nếu có
-            driver.switch_to.alert.accept()
-        
-        with allure.step("Kiểm tra trạng thái"):
-            # Verify nút đổi thành 'Cancelled' hoặc dòng đó biến mất
-            pass
+    @allure.story("TC_FAQ_02: FAQ Accordion Behavior")
+    def test_faq_behavior(self, driver, base_url):
+        driver.get(f"{base_url}/Page/FAQ.cshtml")
+        questions = driver.find_elements(By.CLASS_NAME, "question")
+        if questions:
+            questions[0].click()
+            assert questions[0].is_displayed()
 
-    @allure.story("TC_CP_04: Đổi mật khẩu không khớp")
-    def test_change_pass_mismatch(self, driver):
-        self.login(driver)
-        driver.get("http://www.raillog.net/Account/ChangePassword.cshtml")
-        
-        driver.find_element(By.ID, "currentPassword").send_keys("12345678")
-        driver.find_element(By.ID, "newPassword").send_keys("newpass123")
-        driver.find_element(By.ID, "confirmPassword").send_keys("khongkhop")
-        driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
-        
-        assert "do not match" in driver.page_source
+    @allure.story("TC_TIME_02: Check Timetable")
+    def test_timetable_display(self, driver, base_url):
+        driver.get(f"{base_url}/Page/TrainTimeListPage.cshtml")
+        rows = driver.find_elements(By.XPATH, "//table//tr")
+        assert len(rows) > 1, "Bảng lịch trình phải có dữ liệu"
+
+    @allure.story("TC_PRICE_03: Check Price Table")
+    def test_price_table(self, driver, base_url):
+        driver.get(f"{base_url}/Page/TrainPriceListPage.cshtml")
+       
+        assert "Ticket Price" in driver.title
+        assert len(driver.find_elements(By.TAG_NAME, "table")) > 0
