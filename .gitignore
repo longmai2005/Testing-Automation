@@ -1,4 +1,23 @@
-__pycache__
-.vscode
-.venv
-venv
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+venv/
+env/
+.venv/
+.env
+
+allure-results/
+allure-report/
+.pytest_cache/
+
+*.log
+*.png
+test-output/
+
+.vscode/
+.idea/
+
+# --- MacOS ---
+.DS_Store

@@ -1,113 +1,165 @@
-## 🚀 VNUK 2025: Selenium Automation Framework
+```markdown
+# 🚂 Railway Automation Testing Framework
 
-![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python)
-![Selenium](https://img.shields.io/badge/Selenium-WebDriver-43B02A?style=for-the-badge&logo=selenium)
-![Pattern](https://img.shields.io/badge/Design%20Pattern-POM-orange?style=for-the-badge)
-
-> Dự án kiểm thử tự động hóa cho ứng dụng web Railway, được xây dựng dựa trên Selenium WebDriver và Python. Dự án áp dụng mô hình **Page Object Model (POM)** và **Dynamic Data Generation** để đảm bảo tính ổn định và khả năng bảo trì cao.
+Dự án kiểm thử tự động (Automation Testing) cho hệ thống **Railway Booking** (`http://railwayb1.somee.com`).
+Dự án được xây dựng bằng **Python**, **Selenium WebDriver**, **Pytest** và sử dụng **Allure Report** để xuất báo cáo chuyên nghiệp.
 
 ---
 
-## 📂 Cấu trúc Dự án (Project Structure)
+## 🛠 Yêu cầu hệ thống (Prerequisites)
 
-Dự án được tổ chức theo cấu trúc mô-đun để dễ dàng mở rộng và quản lý:
+Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đặt:
+
+1.  **Python 3.10+**
+2.  **Google Chrome**: Phiên bản mới nhất.
+3.  **Java (JDK 8+)**: Cần thiết để chạy Allure Commandline. 
+
+---
+
+## ⚙️ Hướng dẫn Cài đặt (Installation)
+
+### Bước 1: Clone dự án và tạo môi trường ảo (Virtual Environment)
+
+Mở Terminal (Mac) hoặc CMD/PowerShell (Windows) tại thư mục dự án:
+
+**MacOS / Linux:**
+```bash
+# Tạo môi trường ảo
+python3 -m venv venv
+
+# Kích hoạt môi trường (Bắt buộc mỗi khi mở lại terminal)
+source venv/bin/activate
+
+```
+
+**Windows:**
+
+```bash
+# Tạo môi trường ảo
+python -m venv venv
+
+# Kích hoạt môi trường
+.\venv\Scripts\activate
+
+```
+
+### Bước 2: Cài đặt thư viện Python
+
+```bash
+pip install -r requirements.txt
+
+```
+
+### Bước 3: Cài đặt Allure Commandline (Bắt buộc để xem báo cáo)
+
+Bạn cần cài công cụ Allure vào máy tính (System Path) thì mới xem được báo cáo.
+
+**🍏 Đối với MacOS:**
+Sử dụng Homebrew (Khuyên dùng):
+
+```bash
+brew install allure
+
+```
+
+*Nếu chưa có Homebrew, chạy lệnh này trước:*
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+
+**🪟 Đối với Windows:**
+Cách 1: Sử dụng PowerShell (Nếu đã cài Scoop)
+
+```powershell
+scoop install allure
+
+```
+
+Cách 2: Tải thủ công
+
+1. Tải file zip từ [Maven Central](https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/).
+2. Giải nén vào ổ C.
+3. Thêm đường dẫn thư mục `bin` của Allure vào biến môi trường **PATH** của Windows.
+
+**Cách chung (Nếu máy đã có Node.js):**
+
+```bash
+npm install -g allure-commandline
+
+```
+
+---
+
+## 🚀 Hướng dẫn Chạy Test (Execution)
+
+Đảm bảo bạn đã kích hoạt môi trường ảo (`source venv/bin/activate`) trước khi chạy.
+
+### 1. Chạy toàn bộ Test Case
+
+Lệnh này sẽ chạy tất cả các file test trong thư mục `tests/`:
+
+```bash
+python3 -m pytest --alluredir=allure-results
+
+```
+
+*(Trên Windows dùng `python` thay vì `python3`)*
+
+### 2. Chạy riêng lẻ từng Module
+
+Nếu bạn chỉ muốn test một chức năng cụ thể:
+
+* **Test Đăng ký (Register):**
+```bash
+python3 -m pytest tests/test_03_register.py --alluredir=allure-results
+
+```
+
+
+* **Test Đăng nhập (Login):**
+```bash
+python3 -m pytest tests/test_02_auth.py --alluredir=allure-results
+
+```
+
+
+* **Test Đặt vé (Book Ticket):**
+```bash
+python3 -m pytest tests/test_04_book_ticket.py --alluredir=allure-results
+
+```
+
+
+
+### 3. Xem báo cáo kết quả (Allure Report)
+
+Sau khi chạy test xong, dùng lệnh sau để mở báo cáo trên trình duyệt:
+
+```bash
+allure serve allure-results
+
+```
+
+*(Trình duyệt sẽ tự động mở trang web hiển thị biểu đồ kết quả Pass/Fail).*
+
+---
+
+## 📂 Cấu trúc dự án
 
 ```text
-vnuk-2025/
-├── 📂 base/                 # Lớp cơ sở (Base Page)
-│   └── 🐍 base_page.py      # Xử lý các hành động chung (Wait, Click, Scroll)
-├── 📂 pages/                # Page Objects (POM) - Chứa element và action của từng trang
-│   ├── 🐍 login_page.py     
-│   ├── 🐍 register_page.py  
-│   ├── 🐍 book_ticket_page.py 
-│   ├── 🐍 my_ticket_page.py
-│   └── ...
-├── 📂 test/                 # Chứa các Test Case (Kịch bản kiểm thử)
-│   ├── 🐍 test_login.py     
-│   ├── 🐍 test_book_ticket.py
-│   ├── 🐍 test_flows.py     # Luồng kiểm thử End-to-End
-│   └── ...
-├── 📄 requirements.txt      # Các thư viện phụ thuộc
-└── 📝 README.md             # Tài liệu dự án
-````
+Railway_Automation/
+├── tests/
+│   ├── conftest.py             # Cấu hình Driver & Screenshot tự động
+│   ├── test_01_general.py      # Test Home, FAQ, Link ngoài
+│   ├── test_02_auth.py         # Test Login, Logout
+│   ├── test_03_register.py     # Test Register (Validation, Alert)
+│   ├── test_04_book_ticket.py  # Test Book Ticket (Logic nghiệp vụ)
+│   └── test_05_manage.py       # Test My Ticket, Change Password
+├── allure-results/             # Thư mục chứa dữ liệu báo cáo (JSON)
+├── requirements.txt            # Danh sách thư viện cần thiết
+└── README.md                   # Hướng dẫn sử dụng
 
------
+```
 
-## 🛠️ Cài đặt & Yêu cầu (Installation)
 
-### Tiền điều kiện
+---
 
-  * **Python 3.x** đã được cài đặt.
-  * **Google Chrome** trình duyệt mới nhất.
-  * **ChromeDriver** (Tương thích với bản Chrome hiện tại).
-
-### Các bước cài đặt
-
-1.  **Clone repository về máy:**
-
-    ```bash
-    git clone [https://bitbucket.org/agestvn/vnuk-2025](https://bitbucket.org/agestvn/vnuk-2025)
-    cd vnuk-2025
-    ```
-
-2.  **Cài đặt các thư viện cần thiết:**
-
-    ```bash
-    pip install selenium
-    ```
-
-    *(Hoặc nếu có file requirements.txt)*: `pip install -r requirements.txt`
-
------
-
-## ⚡ Hướng dẫn chạy Test (Usage)
-
-Để chạy kiểm thử, hãy đứng tại thư mục gốc của dự án và sử dụng lệnh module của Python:
-
-| Mục tiêu | Lệnh thực thi (Terminal) |
-| :--- | :--- |
-| **Chạy toàn bộ test** | `python -m unittest discover test` |
-| **Chạy luồng chính (Full Flow)** | `python -m test.test_flows` |
-| **Chạy test Đăng nhập** | `python -m test.test_login` |
-| **Chạy test Đặt vé** | `python -m test.test_book_ticket` |
-
-> **Lưu ý:** Không chạy trực tiếp bằng `python test/test_login.py` để tránh lỗi import module. Hãy dùng `python -m ...`.
-
------
-
-## 🧩 Danh sách Test Case (Test Scenarios)
-
-Dự án bao phủ các chức năng chính của hệ thống Railway:
-
-| Module | Chức năng kiểm thử |
-| :--- | :--- |
-| **Register** | Đăng ký tài khoản mới, kiểm tra validate email/password, check trùng lặp. |
-| **Login** | Đăng nhập thành công, đăng nhập sai pass, khóa tài khoản sau 5 lần sai. |
-| **Book Ticket** | Đặt vé tàu, chọn ga đi/đến, chọn loại ghế, kiểm tra số lượng vé tối đa. |
-| **My Ticket** | Xem vé đã đặt, Hủy vé (Cancel), Lọc vé (Filter). |
-| **Flow** | Luồng End-to-End: Register -\> Login -\> Book Ticket -\> Verify -\> Logout. |
-
------
-
-## ⚙️ Các tính năng kỹ thuật nổi bật
-
-  * **Page Object Model (POM):** Tách biệt code test và code xử lý giao diện, giúp code gọn gàng và dễ sửa chữa.
-  * **Dynamic Data:** Sử dụng hàm random để tạo Email/PID mới mỗi lần chạy -\> Test không bao giờ chết vì dữ liệu cũ.
-  * **Explicit Waits:** Sử dụng `WebDriverWait` thay vì `sleep()` cứng -\> Tăng tốc độ chạy test và độ ổn định.
-  * **Javascript Executor:** Xử lý các trường hợp bị che khuất bởi quảng cáo hoặc UI phức tạp.
-  * **Negative Testing:** Bao gồm cả các case kiểm thử lỗi (nhập sai data) để đảm bảo hệ thống chặn lỗi đúng.
-
------
-
-## 🛣️ Trạng thái phát triển (Roadmap)
-
-  - [x] ✅ Cấu trúc POM cơ bản.
-  - [x] ✅ Hoàn thiện các luồng Register, Login, Book Ticket.
-  - [x] ✅ Xử lý My Ticket (Cancel, Filter).
-  - [ ] 📄 Thêm Reporting (HTML Report).
-  - [ ] 🤖 Tích hợp CI/CD (Jenkins/GitHub Actions).
-  - [ ] 🌐 Hỗ trợ chạy đa trình duyệt (Firefox, Edge).
-
------
-
-*© 2025 VNUK Automation Project - Student Project*
+**Author:** Mai Phước Long - 23020005
